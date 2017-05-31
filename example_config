@@ -1,0 +1,6 @@
+192.168.56.103:22:bob:testpassword123:/home/bob/.ssh/id_rsa_dev:
+192.168.56.104:22:bob:testpassword123:/home/bob/.ssh/id_rsa_dev:
+192.168.56.105:22:dave:devpasswordsupersecret:/home/dave/.ssh/id_rsa_dev:3BQYORLS735ILSJC
+192.168.56.105:22:bob:testpassword123:/home/bob/.ssh/id_rsa_dev:
+192.168.56.105:22:jim::/home/jim/.ssh/id_rsa_dev:
+192.168.56.104:22:bob:::
