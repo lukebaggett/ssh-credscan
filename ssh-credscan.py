@@ -103,7 +103,7 @@ def check_target_pexpect(targets, results, t, blank):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('config', metavar='path', nargs='+', help=("""Configuration file. One host per line format: 'ip:port:username:password:key_path'
+    parser.add_argument('config', metavar='path', nargs='+', help=("""Configuration file. One host per line format: 'ip:port:username:password:key_path:gauth_secret'
 
 Examples:
 
