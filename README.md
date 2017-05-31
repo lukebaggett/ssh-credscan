@@ -70,11 +70,11 @@ For each host, you can provide a private key, a password, and a google authentic
       * timeout or EOF (FAILURE)
       * server prompts for verification code
         * gauth_secret not provided (FAILURE)
-        * gauth_secret provided in config file, send gauth_secret
+        * gauth_secret provided in config file, generate code, send it
           * server returns echval (SUCCESS)
           * timeout or EOF (FAILURE)
   * server prompts for verification code
     * gauth_secret not provided in config (FAILURE)
-    * gauth_secret provided in config file, send gauth_secret
+    * gauth_secret provided in config file, generate code, send it
       * server returns echval (SUCCESS)
       * timeout or EOF (FAILURE)
