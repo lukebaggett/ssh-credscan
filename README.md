@@ -1,4 +1,4 @@
-This script tests how much access a set of credentials gives via SSH on a network. It is designed to work with systems that require multi-factor authentication to gain access. The module pexpect is used to control the ssh client.
+This script tests how much access a set of credentials give via SSH on a network. It is designed to work with systems that require multi-factor authentication to gain access. The module pexpect is used to control the ssh client.
 
 For each host, you can provide a private key, a password, and a google authenticator seed (or any combination of those). The script output will explain which credentials were needed to access each host, or on what step of the login process the attempt failed.
 
