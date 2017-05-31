@@ -12,7 +12,7 @@ For each host, you can provide a private key, a password, and a google authentic
     usage: ssh-credscan.py [-h] [-n] [-t] [-l] [-b] [-vl] [-v] path [path ...]
 
     positional arguments:
-      path                 Configuration file. One host per line format: 'ip:port:username:password:key_path'
+      path                 Configuration file. One host per line format: 'ip:port:username:password:key_path:gauth_secret'
                        
                            Examples:
                        
