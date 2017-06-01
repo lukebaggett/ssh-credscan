@@ -9,95 +9,116 @@ import pyotp
 
 def check_target_pexpect(targets, results, t, blank):
     while not targets.empty():
-        target, port, username, password, key_path, gauth_secret = targets.get()
-        result = "FAILURE"
-        valid_creds = []
-        reason = ""
-        beforelog = ""
-        echval = str(random.randint(10000,99999))
-        child = pexpect.spawn('ssh -v -o StrictHostKeychecking=no -p %s -i %s %s@%s "echo %s"' %
-            (port, key_path, username, target, echval))
-        s0 = child.expect([echval, 'assword:', 'code:', pexpect.EOF, pexpect.TIMEOUT], timeout=t)
-        before = child.before
-        beforelog += before
-        if s0 == 0:
-            if 'server accepts key' in before.lower():
-                valid_creds.append("key")
-            else:
-                valid_creds.append("blank password")
-            result = "SUCCESS"
-        elif s0 == 1:
-            if 'server accepts key' in before.lower():
-                valid_creds.append("key")
-            if ((not blank) and (password == "" or password == None)):
-                reason = "password prompt, no password in config"
-                result = "FAILURE"
-            else:
-                child.sendline(password)
-                s1 = child.expect([echval, 'code:', pexpect.EOF, pexpect.TIMEOUT], timeout=t)
-                before = child.before
-                beforelog += before
-                if s1 == 0:
-                    valid_creds.append("password")
-                    result = "SUCCESS"
-                elif s1 == 1:
-                    valid_creds.append("password")
-                    if gauth_secret == "":
-                        reason = "gauth prompt, no gauth_secret in config"
+        try:
+            target, port, username, password, key_path, gauth_secret = targets.get()
+            result = "FAILURE"
+            valid_creds = []
+            reason = ""
+            beforelog = ""
+            echval = str(random.randint(10000,99999))
+            child = pexpect.spawn('ssh -v -o StrictHostKeychecking=no -p %s -i %s %s@%s "echo %s"' %
+                (port, key_path, username, target, echval))
+            s0 = child.expect([echval, 'assword:', 'code:', pexpect.EOF, pexpect.TIMEOUT], timeout=t)
+            before = child.before
+            beforelog += before
+            if s0 == 0:
+                if 'server accepts key' in before.lower():
+                    valid_creds.append("key")
+                else:
+                    valid_creds.append("blank password")
+                result = "SUCCESS"
+            elif s0 == 1:
+                if 'server accepts key' in before.lower():
+                    valid_creds.append("key")
+                if ((not blank) and (password == "" or password == None)):
+                    reason = "password prompt, no password in config"
+                    result = "FAILURE"
+                else:
+                    child.sendline(password)
+                    s1 = child.expect([echval, 'code:', pexpect.EOF, pexpect.TIMEOUT], timeout=t)
+                    before = child.before
+                    beforelog += before
+                    if s1 == 0:
+                        valid_creds.append("password")
+                        result = "SUCCESS"
+                    elif s1 == 1:
+                        valid_creds.append("password")
+                        if gauth_secret == "":
+                            reason = "gauth prompt, no gauth_secret in config"
+                            result = "FAILURE"
+                        else:
+                            totp = pyotp.TOTP(gauth_secret)
+                            child.sendline(totp.now())
+                            s2 = child.expect([echval, pexpect.EOF, pexpect.TIMEOUT], timeout=t)
+                            before = child.before
+                            beforelog += before
+                            if s2 == 0:
+                                valid_creds.append("gauth")
+                                result = "SUCCESS"
+                            elif s2 == 1:
+                                reason = "EOF on gauth attempt"
+                                result = "FAILURE"
+                            elif s2 == 2:
+                                reason = "timeout on gauth attempt"
+                                result = "FAILURE"
+                    elif s1 == 2:
+                        reason = "EOF on password attempt"
                         result = "FAILURE"
-                    else:
-                        totp = pyotp.TOTP(gauth_secret)
-                        child.sendline(totp.now())
-                        s2 = child.expect([echval, pexpect.EOF, pexpect.TIMEOUT], timeout=t)
-                        before = child.before
-                        beforelog += before
-                        if s2 == 0:
-                            valid_creds.append("gauth")
-                            result = "SUCCESS"
-                        elif s2 == 1:
-                            reason = "EOF on gauth attempt"
-                            result = "FAILURE"
-                        elif s2 == 2:
-                            reason = "timeout on gauth attempt"
-                            result = "FAILURE"
-                elif s1 == 2:
-                    reason = "EOF on password attempt"
+                    elif s1 == 3:
+                        reason = "timeout on password attempt"
+                        result = "FAILURE"
+            elif s0 == 2:
+                if 'server accepts key' in before.lower():
+                    valid_creds.append("key")
+                if gauth_secret == "":
+                    reason = "gauth prompt, no gauth_secret in config"
                     result = "FAILURE"
-                elif s1 == 3:
-                    reason = "timeout on password attempt"
-                    result = "FAILURE"
-        elif s0 == 2:
-            if 'server accepts key' in before.lower():
-                valid_creds.append("key")
-            if gauth_secret == "":
-                reason = "gauth prompt, no gauth_secret in config"
+                else:
+                    totp = pyotp.TOTP(gauth_secret)
+                    child.sendline(totp.now())
+                    s1 = child.expect([echval, 'assword:', pexpect.EOF, pexpect.TIMEOUT], timeout=t)
+                    before = child.before
+                    beforelog += before
+                    if s1 == 0:
+                        valid_creds.append("gauth")
+                        result = "SUCCESS"
+                    elif s1 == 1:
+                        if ((not blank) and (password == "" or password == None)):
+                            reason = "password prompt, no password in config"
+                            result = "FAILURE"
+                        else:
+                            child.sendline(password)
+                            s2 = child.expect([echval, pexpect.EOF, pexpect.TIMEOUT], timeout=t)
+                            before = child.before
+                            beforelog += before
+                            if s2 == 0:
+                                valid_creds.append("password")
+                                result = "SUCCESS"
+                            elif s2 == 1:
+                                reason = "EOF on password attempt"
+                                result = "FAILURE"
+                            elif s2 == 2:
+                                reason = "timeout on password attempt"
+                                result = "FAILURE"
+                    elif s1 == 2:
+                        reason = "EOF on gauth attempt"
+                        result = "FAILURE"
+                    elif s1 == 3:
+                        reason = "timeout on gauth attempt"
+                        result = "FAILURE"
+            elif s0 == 3:
+                reason = "EOF on initial attempt"
                 result = "FAILURE"
-            else:
-                totp = pyotp.TOTP(gauth_secret)
-                child.sendline(totp.now())
-                s1 = child.expect([echval, pexpect.EOF, pexpect.TIMEOUT], timeout=t)
-                before = child.before
-                beforelog += before
-                if s1 == 0:
-                    valid_creds.append("gauth")
-                    result = "SUCCESS"
-                elif s1 == 1:
-                    reason = "EOF on gauth attempt"
-                    result = "FAILURE"
-                elif s1 == 2:
-                    reason = "timeout on gauth attempt"
-                    result = "FAILURE"
-        elif s0 == 3:
-            reason = "EOF on initial attempt"
-            result = "FAILURE"
-        elif s0 == 4:
-            reason = "timeout on initial attempt"
-            result = "FAILURE"
-        child.close()
-        
-        resultstr = (result + " (valid_creds: " + ", ".join(valid_creds) + ")")
-        if reason != "":
-            resultstr = (result + " (reason: " + reason + ") (valid_creds: " + ", ".join(valid_creds) + ")")
+            elif s0 == 4:
+                reason = "timeout on initial attempt"
+                result = "FAILURE"
+            child.close()
+            resultstr = (result + " (valid_creds: " + ", ".join(valid_creds) + ")")
+            if reason != "":
+                resultstr = (result + " (reason: " + reason + ") (valid_creds: " + ", ".join(valid_creds) + ")")
+        except Exception as e:
+            resultstr = ("FAILURE (exception in thread: " + str(type(e)))
+
         results.put([resultstr, target, port, username, password, key_path, gauth_secret, beforelog])
         targets.task_done()
 
