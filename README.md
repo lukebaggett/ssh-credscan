@@ -2,9 +2,9 @@ This script tests how much access a set of credentials give via SSH on a network
 
 For each host, you can provide a private key, a password, and a google authenticator seed (or any combination of those). The script output will explain which credentials were needed to access each host, or on what step of the login process the attempt failed.
 
-#### Install Dependencies:
+#### Install Python2 Dependencies:
 
-    sudo pip install pyotp
+    pip2 install pyotp pexpect
 
 
 #### Help
