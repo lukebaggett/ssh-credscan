@@ -4,7 +4,7 @@ For each host, you can provide a private key, a password, and a google authentic
 
 #### Install Python2 Dependencies:
 
-    pip2 install pyotp pexpect
+    pip2 install pyotp==2 pexpect
 
 
 #### Help
